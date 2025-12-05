@@ -1,0 +1,366 @@
+You are a senior UI/UX designer and front-end architect.
+
+I want you to design and generate the front-end code for a **Formula 1 analytics web app** called **"F1 Mega Dashboard"**.
+
+### 1. Tech stack and structure
+
+- Use **React + TypeScript + Vite**.
+- Organize the app like this:
+
+  src/
+    App.tsx
+    main.tsx
+    index.css
+    components/
+      DashboardCard.tsx
+      PageHeader.tsx
+      SectionTitle.tsx
+      FiltersBar.tsx
+      DataTable.tsx
+      KpiCard.tsx
+    pages/
+      OverviewPage.tsx
+      SeasonPage.tsx
+      CircuitsPage.tsx
+      TeamsPage.tsx
+      DriversPage.tsx
+
+- The app will later consume data from a backend REST API (FastAPI + PostgreSQL), but for now use **mocked data** and **clean props** so that it is easy to plug real data later (e.g. props like `topDriversAllTime`, `constructorWinsBySeason`, etc.).
+
+### 2. Global layout and navigation
+
+Design a **dark, cinematic F1-style dashboard** inspired by professional BI tools and modern F1 apps (without using official logos or trademarks).
+
+Global layout:
+
+- A **full-width top bar** with:
+  - App title: **"F1 Mega Dashboard"** on the left.
+  - Navigation tabs: `"Overview"`, `"Circuits"`, `"Teams"`, `"Drivers"`, `"Season"`.
+  - On the right side: a **Season selector** (dropdown) with years from 2024 down to 1950.
+
+- Below the top bar, a main content area:
+  - Centered **dashboard frame** with max-width and full height.
+  - Background: dark gradient (e.g. #050810, #090d18).
+  - Cards: slightly lighter panels (e.g. #101626, #141a2b) with rounded corners and soft inner shadows.
+
+Navigation behavior:
+
+- `App.tsx` must manage the active view with a simple state machine, like:
+
+  - Type: `"overview" | "circuits" | "teams" | "drivers" | "season"`.
+  - Top bar buttons switch the active view.
+  - The selected season is stored in state and passed as prop to pages.
+
+- The main content area renders:
+
+  - `<OverviewPage season={season} />`
+  - `<CircuitsPage season={season} />`
+  - `<TeamsPage season={season} />`
+  - `<DriversPage season={season} />`
+  - `<SeasonPage season={season} />`
+
+### 3. Design system and reusable components
+
+Create a small design system:
+
+- **Colors:**
+  - Global background: very dark blue/gray (`#050810`, `#090d18`).
+  - Card background: `#101626` / `#141a2b`.
+  - Accents: reds/oranges for highlights and active items.
+  - Borders: subtle, semi-transparent (e.g. `rgba(255,255,255,0.06)`).
+
+- **Typography:**
+  - Modern, slightly condensed, numeric-friendly.
+  - Card titles in uppercase with small letter spacing.
+  - KPIs with large, bold numeric styling.
+
+- **Shared components:**
+
+  1. `DashboardCard`
+     - Props: `title`, optional `subtitle`, `children`.
+     - Layout: header (title + subtitle) and body content area.
+
+  2. `PageHeader`
+     - Props: `title`, `subtitle`.
+     - Used at the top of each page (within the dashboard frame).
+
+  3. `SectionTitle`
+     - Simple sub-section title within a page.
+
+  4. `FiltersBar`
+     - Horizontal bar with possible children, good spacing and pill-like controls.
+
+  5. `DataTable`
+     - Reusable table component supporting:
+       - Column headers
+       - Rows
+       - Hover states
+       - Optional compact mode
+     - Head fixed, scrollable body if height is limited.
+
+  6. `KpiCard`
+     - For key numeric stats.
+     - Props like: `label`, `value`, optional `hint`.
+
+- Use simple chart placeholders (you can use a typical chart library syntax OR just structured markup indicating where charts will go). The goal is **to have clear components that can later be wired to real chart libraries** such as Recharts or similar.
+
+---
+
+### 4. Page: Overview (global stats)
+
+File: `src/pages/OverviewPage.tsx`
+
+Goal: give a **high-level view** of F1 performance, mixing all-time stats and current-season data.
+
+Layout:
+
+1. **Page header:**
+   - Title: `Overview`
+   - Subtitle: `Global Formula 1 stats and current season highlights.`
+
+2. **Top KPI strip (3 big KPI cards):**
+   - KPI 1: `TOTAL WINS (TOP 10 DRIVERS)` – big numeric value, subtitle `Historical total`.
+   - KPI 2: `TEAMS WITH WINS THIS SEASON` – number of different teams that won a race in the selected season.
+   - KPI 3: `DISTINCT RESULT STATUSES THIS SEASON` – number of result types (Finished, Engine, Accident, +1 Lap, etc.).
+
+3. **Row 1 – two charts:**
+   - Left: `DashboardCard` titled `TOP DRIVERS BY WINS (ALL TIME)`:
+     - Horizontal or vertical bar chart (mock data).
+   - Right: `DashboardCard` titled `WINS BY TEAM – SEASON [YEAR]`:
+     - Bar chart (constructors on x-axis, wins on y-axis).
+
+4. **Row 2 – table and pie chart:**
+   - Left: `DashboardCard` titled `TOP DRIVERS – SEASON [YEAR] (FINAL POINTS)`:
+     - Table with columns: Position, Driver, Team, Points.
+   - Right: `DashboardCard` titled `RESULT STATUS DISTRIBUTION – SEASON [YEAR]`:
+     - Pie chart (or donut) showing distribution of statuses.
+
+Use mocked data, but design the components with props like:
+- `topDriversAllTime`
+- `constructorWinsBySeason`
+- `driverStandingsBySeason`
+- `statusDistributionBySeason`
+
+---
+
+### 5. Page: Season (detailed season analysis)
+
+File: `src/pages/SeasonPage.tsx`
+
+Purpose: deep-dive into one specific season selected in the top bar.
+
+Layout:
+
+1. **Page header:**
+   - Title: `Season [YEAR]`
+   - Subtitle: `Champions, top 10 drivers and race-by-race performance.`
+
+2. **Summary strip (3 medium cards):**
+   - Card 1: `Drivers' Champion` – name, team, total points.
+   - Card 2: `Constructors' Champion` – team name, points.
+   - Card 3: `Races in Season` – total number of races.
+
+3. **Section: Top 10 drivers (table)**
+   - `DashboardCard` titled `TOP 10 DRIVERS – SEASON [YEAR]`.
+   - Table columns: Pos, Driver, Team, Points, Wins, Podiums.
+   - Scrollable if needed.
+
+4. **Section: Race results list**
+   - `DashboardCard` titled `RACE RESULTS – SEASON [YEAR]`.
+   - Table columns: Round, Grand Prix, Winner (driver), Team, Winner Points, Circuit, Date.
+   - Row hover, alternate row backgrounds.
+
+5. **Optional charts section:**
+   - Line chart: cumulative points of top 3 drivers by round.
+   - Bar chart: wins per team in that season.
+
+Use mocked data; keep the structure ready to receive:
+- `seasonChampionDriver`
+- `seasonChampionConstructor`
+- `seasonRaces`
+- `driverStandingsTop10`
+
+---
+
+### 6. Page: Circuits
+
+File: `src/pages/CircuitsPage.tsx`
+
+Goal: explore circuits and see which drivers/teams dominate each track.
+
+Layout:
+
+1. **Page header:**
+   - Title: `Circuits`
+   - Subtitle: `Explore tracks and performance by location.`
+
+2. **Filters bar:**
+   - Use `FiltersBar` component.
+   - Include:
+     - Text input: `Search by circuit or country`.
+     - Dropdown: `Filter by country`.
+     - Optional dropdown: `Filter by region/continent`.
+     - A `Clear filters` button.
+
+3. **Split layout: left list / right details:**
+
+   Left side (~40% width):
+   - `DashboardCard` titled `Circuits List`.
+   - Scrollable list of circuits as clickable rows or small cards, each with:
+     - Circuit name
+     - City + Country
+     - Count of GPs held.
+
+   Right side (~60% width):
+   - When a circuit is selected, show a `DashboardCard` titled `Circuit Details`, containing:
+     - Circuit name, location, country.
+     - Small block with stats: GPs held, first season, last season.
+     - Description placeholder.
+
+   - Below details, two compact charts:
+     - Bar chart: `Top Drivers at this Circuit (Wins)`.
+     - Bar chart: `Top Teams at this Circuit (Wins)`.
+
+Mocked data, but future props:
+- `circuits`
+- `selectedCircuitDetails`
+- `topDriversAtCircuit`
+- `topTeamsAtCircuit`
+
+---
+
+### 7. Page: Teams (constructors)
+
+File: `src/pages/TeamsPage.tsx`
+
+Goal: show **historical performance of constructors** and allow drilling into one team.
+
+Layout:
+
+1. **Page header:**
+   - Title: `Teams`
+   - Subtitle: `Historical results and evolution by constructor.`
+
+2. **Top section: ranking table**
+   - `DashboardCard` titled `TEAMS RANKING (ALL TIME)`.
+   - A wide table with columns:
+     - Team
+     - Country
+     - Races
+     - Wins
+     - Podiums
+     - Poles
+     - Total Points
+   - Visual sort icons on columns (even if not fully implemented yet).
+   - Clicking a row selects that team.
+
+3. **Team detail panel (below ranking):**
+
+   Layout:
+
+   - Left side:
+     - Summary card with:
+       - Team name
+       - Country
+       - Stats: championships, wins, podiums, poles.
+       - List of “legendary drivers” with small inline chips (e.g. name + wins).
+
+   - Right side:
+     - `DashboardCard` with tabs:
+       - `Points by Season` – line chart.
+       - `Wins by Season` – bar chart.
+       - `Podiums by Season` – bar chart.
+
+Mocked data; later props:
+- `constructorsRankingAllTime`
+- `teamSeasonHistory` (points, wins, podiums per year)
+- `teamLegendDrivers`
+
+---
+
+### 8. Page: Drivers
+
+File: `src/pages/DriversPage.tsx`
+
+Goal: deep profile and career stats for each driver.
+
+Layout:
+
+1. **Page header:**
+   - Title: `Drivers`
+   - Subtitle: `Career overview, titles and race results.`
+
+2. **Three-column layout:**
+
+Left column (~30% width):
+- `DashboardCard` titled `Drivers List`.
+- Filters:
+  - Search input: `Search driver`.
+  - Dropdown: `Filter by nationality`.
+- Scrollable list with each driver item showing:
+  - Small circular avatar placeholder.
+  - Name.
+  - Nationality.
+  - Short stat line: `X wins • Y podiums • Z titles`.
+- Clicking a driver selects them.
+
+Middle column (~40% width):
+- `DashboardCard` titled `Driver Career Overview`.
+- Content:
+  - Large name and nationality.
+  - Placeholder for image or profile silhouette.
+  - KPIs:
+    - Championships
+    - Wins
+    - Podiums
+    - Poles
+    - Fastest laps
+  - Small text area for bio/description.
+
+Right column (~30% width):
+- `DashboardCard` with tabs:
+  - `Season Positions`: line chart of championship finishing position over years.
+  - `Wins by Season`: bar chart per year.
+  - `Podiums by Season`: bar chart per year.
+- At the bottom of this card, a compact table:
+  - Last 10 races for the selected driver.
+  - Columns: Season, Grand Prix, Position, Points.
+
+Mocked data; future props:
+- `driversList`
+- `driverProfile`
+- `driverSeasonsStats`
+- `driverRecentResults`
+
+---
+
+### 9. Visual style and UX behavior
+
+- Dark mode by default with subtle gradients.
+- Use significant padding and spacing between cards to avoid clutter.
+- Smooth hover states for buttons, tabs, list items and table rows.
+- Active navigation tab should be clearly highlighted using accent color and maybe an underline.
+- The design should feel like a **premium data product for motorsport analysts**, not a simple CRUD app.
+
+---
+
+### 10. Deliverables
+
+Generate:
+
+1. The complete React + TypeScript code for:
+   - `App.tsx` with tab navigation and season selector.
+   - All pages (`OverviewPage`, `SeasonPage`, `CircuitsPage`, `TeamsPage`, `DriversPage`).
+   - Shared components (`DashboardCard`, `PageHeader`, `SectionTitle`, `FiltersBar`, `DataTable`, `KpiCard`).
+   - Basic global styling in `index.css`.
+
+2. Use mocked data inside the pages/components, but keep the data flow designed so later I can replace these mocks with real API calls to endpoints like:
+   - `/api/top-drivers-wins`
+   - `/api/constructors-wins`
+   - `/api/driver-standings`
+   - `/api/status-distribution`
+   - `/api/circuits`
+   - `/api/constructors`
+   - `/api/drivers`
+
+Focus on clean code structure, premium UX and a visually impressive F1 analytics interface.
