@@ -1,9 +1,9 @@
 1 +# F1 MegaDash
-     2 +
-     3 +Para rodar o projeto localmente:
-     4 +
-     5 +1. Instale Node.js (inclui npm) e certifique-se de que o ambiente consegue instalar projetos React.
-     6 +2. Na raiz do projeto, rode:
+
+      +Para rodar o projeto localmente:
+      
+     1. Instale Node.js (inclui npm) e certifique-se de que o ambiente consegue instalar projetos React.
+     6 2. Na raiz do projeto, rode:
      7 +   ```bash
      8 +   npm install
      9 +   ```
